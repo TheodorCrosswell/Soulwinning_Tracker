@@ -1,4 +1,4 @@
-import { deleteAllRecords } from "@/lib/database";
+import { deleteAllRecords, insertDummyData } from "@/lib/database";
 import { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -20,6 +20,26 @@ export default function SettingsScreen() {
           onPress: () => {
             console.log("SQLite DB cleared");
             deleteAllRecords();
+          },
+        },
+      ]
+    );
+  };
+
+  const handleInputDummyData = () => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to insert dummy data into the SQLite database?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            console.log("Dummy data inserted");
+            insertDummyData();
           },
         },
       ]
@@ -68,6 +88,13 @@ export default function SettingsScreen() {
           title="Export Data"
           onPress={handleExportData}
           color="#007AFF"
+        />
+      </View>
+      <View style={styles.destructiveButtonContainer}>
+        <Button
+          title="Input Dummy Data"
+          onPress={handleInputDummyData}
+          color="#34C759"
         />
       </View>
       <View style={styles.destructiveButtonContainer}>

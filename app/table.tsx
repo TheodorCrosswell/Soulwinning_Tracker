@@ -14,44 +14,53 @@ import {
   Text,
   View,
 } from "react-native";
-import { deleteRecord, selectLatestRecords } from "../lib/database"; // Adjust the import path if necessary
+// Adjust the import path if necessary. Assumes countRecords function exists.
+import {
+  countRecords,
+  deleteRecord,
+  selectLatestRecords,
+} from "../lib/database";
 import { Record, RootStackParamList } from "../navigation/types"; // Adjust path if needed
 
-// // Define an interface for the record object for better type safety
-// interface Record {
-//   id: number;
-//   name: string | null;
-//   count: number | null;
-//   description: string | null;
-//   imageUri: string | null;
-//   lat: number | null;
-//   lng: number | null;
-//   date: Date;
-// }
-
 export default function TableScreen() {
-  // Use the defined type for the navigation prop
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [records, setRecords] = useState<Record[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  const loadRecords = useCallback(() => {
-    try {
-      const dbRecords = selectLatestRecords(100, 0);
-      setRecords(dbRecords);
-    } catch (error) {
-      console.error("Failed to fetch records:", error);
-      Alert.alert("Error", "Failed to load records.");
-    }
-  }, []);
+  // State for pagination
+  const [offset, setOffset] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const limit = 10; // Set the number of records per page
 
-  // useFocusEffect runs when the screen is focused.
+  // useFocusEffect runs when the screen is focused or when offset changes.
   useFocusEffect(
     useCallback(() => {
-      loadRecords();
-    }, [loadRecords])
+      let isActive = true;
+
+      const loadData = () => {
+        try {
+          // Fetch total record count and the records for the current page
+          const total = countRecords();
+          const dbRecords = selectLatestRecords(limit, offset);
+
+          if (isActive) {
+            setTotalRecords(total);
+            setRecords(dbRecords);
+          }
+        } catch (error) {
+          console.error("Failed to fetch records:", error);
+          Alert.alert("Error", "Failed to load records.");
+        }
+      };
+
+      loadData();
+
+      return () => {
+        isActive = false; // Cleanup to prevent state updates on unmounted component
+      };
+    }, [offset]) // Rerun effect if offset changes
   );
 
   // Handles the press of the "View" button
@@ -76,10 +85,15 @@ export default function TableScreen() {
           onPress: () => {
             try {
               deleteRecord(id);
-              // Optimistically remove the record from the UI
-              setRecords((prevRecords) =>
-                prevRecords.filter((record) => record.id !== id)
-              );
+              // After deleting, reload data to reflect changes and pagination
+              const total = countRecords();
+              const newOffset =
+                offset >= total && offset > 0 ? offset - limit : offset;
+              const dbRecords = selectLatestRecords(limit, newOffset);
+
+              setTotalRecords(total);
+              setOffset(newOffset);
+              setRecords(dbRecords);
             } catch (error) {
               console.error("Failed to delete record:", error);
               Alert.alert("Error", "Failed to delete the record.");
@@ -94,9 +108,19 @@ export default function TableScreen() {
 
   const handleEdit = () => {
     if (selectedRecord) {
-      // This is now type-safe and the error is gone
       navigation.navigate("input", { record: selectedRecord });
       setModalVisible(false);
+    }
+  };
+
+  // Pagination navigation handlers
+  const handlePrevious = () => {
+    setOffset((prevOffset) => Math.max(0, prevOffset - limit));
+  };
+
+  const handleNext = () => {
+    if (offset + limit < totalRecords) {
+      setOffset((prevOffset) => prevOffset + limit);
     }
   };
 
@@ -119,12 +143,32 @@ export default function TableScreen() {
   );
 
   return (
-    <>
+    <View style={styles.container}>
       <FlatList
         data={records}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
       />
+
+      {/* Pagination Bar */}
+      <View style={styles.paginationBar}>
+        <Button
+          title="Previous"
+          onPress={handlePrevious}
+          disabled={offset === 0}
+        />
+        <Text style={styles.paginationText}>
+          {`Showing ${totalRecords > 0 ? offset + 1 : 0}-${
+            offset + records.length
+          } of ${totalRecords}`}
+        </Text>
+        <Button
+          title="Next"
+          onPress={handleNext}
+          disabled={offset + limit >= totalRecords}
+        />
+      </View>
+
       {selectedRecord && (
         <Modal
           animationType="none"
@@ -134,6 +178,7 @@ export default function TableScreen() {
             setModalVisible(!modalVisible);
           }}
         >
+          {/* Modal content remains the same... */}
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>
@@ -161,7 +206,6 @@ export default function TableScreen() {
                 {new Date(selectedRecord.date).toLocaleString()}
               </Text>
 
-              {/* Image display section */}
               <View style={styles.imageContainer}>
                 {selectedRecord.imageUri && !imageError ? (
                   <Image
@@ -185,11 +229,14 @@ export default function TableScreen() {
           </View>
         </Modal>
       )}
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   itemContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -208,18 +255,33 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
   },
+  paginationBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+    backgroundColor: "#f8f8f8",
+  },
+  paginationText: {
+    fontSize: 14,
+    color: "#333",
+  },
   centeredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 22,
+    backgroundColor: "rgba(0,0,0,0.5)", // Added for better modal focus
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
-    alignItems: "stretch", // Changed to stretch for better layout
+    alignItems: "stretch",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -228,6 +290,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    width: "90%", // Set a max-width for the modal
   },
   modalText: {
     marginBottom: 15,

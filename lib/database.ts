@@ -116,6 +116,27 @@ export const selectLatestRecords = (limit: number, offset: number): any[] => {
 };
 
 /**
+ * Counts the total number of records in the 'records' table.
+ * @returns {number} The total number of records.
+ */
+export const countRecords = (): number => {
+  try {
+    // Use an alias 'total' for cleaner property access
+    const result = db.getFirstSync<{ total: number }>(
+      `SELECT COUNT(*) as total FROM records;`
+    );
+
+    if (result && typeof result.total === "number") {
+      return result.total;
+    }
+    return 0;
+  } catch (error) {
+    console.error("Error counting records:", error);
+    throw error;
+  }
+};
+
+/**
  * Deletes a single record from the 'records' table by its ID.
  * @param {number} id The ID of the record to delete.
  * @returns {SQLiteRunResult} The result of the delete operation.
@@ -177,6 +198,121 @@ export const updateRecord = (
     return result;
   } catch (error) {
     console.error(`Error updating record with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const insertDummyData = (): void => {
+  try {
+    const dummyData = [
+      {
+        name: "Apple",
+        count: 5,
+        description: "Fresh red apples",
+        imageUri: null,
+        lat: 34.0522,
+        lng: -118.2437,
+        date: "2023-10-27T10:00:00.000Z",
+      },
+      {
+        name: "Banana",
+        count: 10,
+        description: "Ripe yellow bananas",
+        imageUri: null,
+        lat: 36.7783,
+        lng: -119.4179,
+        date: "2023-10-27T10:05:00.000Z",
+      },
+      {
+        name: "Orange",
+        count: 8,
+        description: "Juicy oranges",
+        imageUri: null,
+        lat: 38.5816,
+        lng: -121.4944,
+        date: "2023-10-27T10:10:00.000Z",
+      },
+      {
+        name: "Grapes",
+        count: 25,
+        description: "Sweet green grapes",
+        imageUri: null,
+        lat: 35.3733,
+        lng: -119.0187,
+        date: "2023-10-28T11:00:00.000Z",
+      },
+      {
+        name: "Strawberry",
+        count: 50,
+        description: "Organic strawberries",
+        imageUri: null,
+        lat: 33.6846,
+        lng: -117.8265,
+        date: "2023-10-28T11:05:00.000Z",
+      },
+      {
+        name: "Blueberry",
+        count: 100,
+        description: "Fresh blueberries",
+        imageUri: null,
+        lat: 45.5051,
+        lng: -122.675,
+        date: "2023-10-29T12:00:00.000Z",
+      },
+      {
+        name: "Mango",
+        count: 3,
+        description: "Sweet mangoes",
+        imageUri: null,
+        lat: 25.7617,
+        lng: -80.1918,
+        date: "2023-10-29T12:05:00.000Z",
+      },
+      {
+        name: "Pineapple",
+        count: 2,
+        description: "Tropical pineapples",
+        imageUri: null,
+        lat: 21.3069,
+        lng: -157.8583,
+        date: "2023-10-30T13:00:00.000Z",
+      },
+      {
+        name: "Watermelon",
+        count: 1,
+        description: "Large juicy watermelon",
+        imageUri: null,
+        lat: 32.7157,
+        lng: -117.1611,
+        date: "2023-10-30T13:05:00.000Z",
+      },
+      {
+        name: "Peach",
+        count: 6,
+        description: "Ripe peaches",
+        imageUri: null,
+        lat: 33.749,
+        lng: -84.388,
+        date: "2023-10-31T14:00:00.000Z",
+      },
+    ];
+
+    for (const record of dummyData) {
+      db.runSync(
+        `INSERT INTO records (name, count, description, imageUri, lat, lng, date) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+        [
+          record.name,
+          record.count,
+          record.description,
+          record.imageUri,
+          record.lat,
+          record.lng,
+          record.date,
+        ]
+      );
+    }
+  } catch (error) {
+    console.error("Error inserting dummy data:", error);
     throw error;
   }
 };
