@@ -145,3 +145,38 @@ export const deleteAllRecords = (): SQLiteRunResult => {
     throw error;
   }
 };
+
+/**
+ * Updates an existing record in the database.
+ * @param id The ID of the record to update.
+ * @param name The updated name.
+ * @param count The updated count.
+ * @param description The updated description.
+ * @param imageUri The updated image URI.
+ * @param lat The updated latitude.
+ * @param lng The updated longitude.
+ * @param date The updated date.
+ * @returns The result of the update operation.
+ */
+export const updateRecord = (
+  id: number,
+  name: string,
+  count: number,
+  description: string | null,
+  imageUri: string | null,
+  lat: number | null,
+  lng: number | null,
+  date: string
+): SQLiteRunResult => {
+  try {
+    const result = db.runSync(
+      "UPDATE records SET name = ?, count = ?, description = ?, imageUri = ?, lat = ?, lng = ?, date = ? WHERE id = ?",
+      [name, count, description, imageUri, lat, lng, date, id]
+    );
+    console.log(`Record with ID ${id} updated successfully.`);
+    return result;
+  } catch (error) {
+    console.error(`Error updating record with ID ${id}:`, error);
+    throw error;
+  }
+};

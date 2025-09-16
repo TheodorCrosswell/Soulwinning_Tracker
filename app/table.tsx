@@ -1,4 +1,8 @@
-import { useFocusEffect } from "@react-navigation/native";
+import {
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import {
   Alert,
@@ -11,20 +15,23 @@ import {
   View,
 } from "react-native";
 import { deleteRecord, selectLatestRecords } from "../lib/database"; // Adjust the import path if necessary
+import { Record, RootStackParamList } from "../navigation/types"; // Adjust path if needed
 
-// Define an interface for the record object for better type safety
-interface Record {
-  id: number;
-  name: string | null;
-  count: number | null;
-  description: string | null;
-  imageUri: string | null;
-  lat: number | null;
-  lng: number | null;
-  date: Date;
-}
+// // Define an interface for the record object for better type safety
+// interface Record {
+//   id: number;
+//   name: string | null;
+//   count: number | null;
+//   description: string | null;
+//   imageUri: string | null;
+//   lat: number | null;
+//   lng: number | null;
+//   date: Date;
+// }
 
 export default function TableScreen() {
+  // Use the defined type for the navigation prop
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [records, setRecords] = useState<Record[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
@@ -83,6 +90,14 @@ export default function TableScreen() {
       ],
       { cancelable: false }
     );
+  };
+
+  const handleEdit = () => {
+    if (selectedRecord) {
+      // This is now type-safe and the error is gone
+      navigation.navigate("input", { record: selectedRecord });
+      setModalVisible(false);
+    }
   };
 
   const renderItem = ({ item }: { item: Record }) => (
@@ -160,15 +175,7 @@ export default function TableScreen() {
               </View>
 
               <View style={styles.modalButtonContainer}>
-                <Button
-                  title="Edit"
-                  onPress={() => {
-                    Alert.alert(
-                      "Not implemented yet.",
-                      "edit functionality not available."
-                    );
-                  }}
-                />
+                <Button title="Edit" onPress={handleEdit} />
                 <Button
                   title="Close"
                   onPress={() => setModalVisible(!modalVisible)}

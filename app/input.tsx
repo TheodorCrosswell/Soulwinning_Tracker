@@ -2,6 +2,7 @@
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -14,9 +15,17 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { init, insertRecord } from "../lib/database"; // Make sure the path is correct
+import { init, insertRecord, updateRecord } from "../lib/database"; // Make sure the path is correct
+import { RootNavigationProp, RootStackParamList } from "../navigation/types"; // Adjust path if needed
 
 export default function InputScreen() {
+  // Use RouteProp to type the route and its params
+  const route = useRoute<RouteProp<RootStackParamList, "input">>();
+  const navigation = useNavigation<RootNavigationProp>();
+  // The 'record' property is now correctly typed
+  const record = route.params?.record;
+
+  const [id, setId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [count, setCount] = useState(0); // Default value is 0
   const [description, setDescription] = useState("");
@@ -39,9 +48,34 @@ export default function InputScreen() {
       });
   }, []);
 
+  useEffect(() => {
+    if (record) {
+      setId(record.id);
+      setName(record.name || "");
+      setCount(record.count || 0);
+      setDescription(record.description || "");
+      setImage(record.imageUri || null);
+      if (record.lat && record.lng) {
+        setLocation({
+          coords: {
+            latitude: record.lat,
+            longitude: record.lng,
+            altitude: null,
+            accuracy: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date(record.date).getTime(),
+        });
+      }
+      setDate(new Date(record.date));
+    }
+  }, [record]);
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
@@ -73,17 +107,30 @@ export default function InputScreen() {
 
   const saveRecord = async () => {
     try {
-      await insertRecord(
-        name,
-        count,
-        description,
-        image,
-        location?.coords.latitude ?? null,
-        location?.coords.longitude ?? null,
-        date.toISOString()
-      );
-      Alert.alert("Success", "Record saved successfully!");
-      // Clear the form
+      if (id) {
+        await updateRecord(
+          id,
+          name,
+          count,
+          description,
+          image,
+          location?.coords.latitude ?? null,
+          location?.coords.longitude ?? null,
+          date.toISOString()
+        );
+        Alert.alert("Success", "Record updated successfully!");
+      } else {
+        await insertRecord(
+          name,
+          count,
+          description,
+          image,
+          location?.coords.latitude ?? null,
+          location?.coords.longitude ?? null,
+          date.toISOString()
+        );
+        Alert.alert("Success", "Record saved successfully!");
+      }
       clearForm();
     } catch (err) {
       console.log("Error saving record:", err);
@@ -117,6 +164,7 @@ export default function InputScreen() {
   };
 
   const clearForm = () => {
+    setId(null);
     setName("");
     setCount(0);
     setDescription("");
