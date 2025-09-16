@@ -12,6 +12,17 @@ export interface Record {
   date: Date;
 }
 
+export interface MapRecord {
+  id: number;
+  name: string | null;
+  count: number | null;
+  description: string | null;
+  imageUri: string | null;
+  lat: number;
+  lng: number;
+  date: Date;
+}
+
 // Define the parameters for each screen in your stack
 export type RootStackParamList = {
   table: undefined; // The Table screen takes no parameters

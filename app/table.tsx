@@ -1,3 +1,11 @@
+// table.tsx
+import {
+  countRecords,
+  deleteRecord,
+  selectLatestRecords,
+} from "@/lib/database";
+import Pagination from "@/lib/pagination"; // Import the reusable component
+import { Record, RootStackParamList } from "@/navigation/types";
 import {
   NavigationProp,
   useFocusEffect,
@@ -14,13 +22,6 @@ import {
   Text,
   View,
 } from "react-native";
-// Adjust the import path if necessary. Assumes countRecords function exists.
-import {
-  countRecords,
-  deleteRecord,
-  selectLatestRecords,
-} from "../lib/database";
-import { Record, RootStackParamList } from "../navigation/types"; // Adjust path if needed
 
 export default function TableScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -30,18 +31,16 @@ export default function TableScreen() {
   const [imageError, setImageError] = useState(false);
 
   // State for pagination
-  const [offset, setOffset] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
-  const limit = 10; // Set the number of records per page
+  const [offset, setOffset] = useState(0);
+  const limit = 50;
 
-  // useFocusEffect runs when the screen is focused or when offset changes.
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
 
       const loadData = () => {
         try {
-          // Fetch total record count and the records for the current page
           const total = countRecords();
           const dbRecords = selectLatestRecords(limit, offset);
 
@@ -58,19 +57,17 @@ export default function TableScreen() {
       loadData();
 
       return () => {
-        isActive = false; // Cleanup to prevent state updates on unmounted component
+        isActive = false;
       };
-    }, [offset]) // Rerun effect if offset changes
+    }, [offset])
   );
 
-  // Handles the press of the "View" button
   const handleView = (item: Record) => {
     setSelectedRecord(item);
-    setImageError(false); // Reset image error state when opening modal
+    setImageError(false);
     setModalVisible(true);
   };
 
-  // Handles the press of the "Delete" button with a confirmation
   const handleDelete = (id: number, name: string | null) => {
     Alert.alert(
       "Delete Record",
@@ -85,7 +82,6 @@ export default function TableScreen() {
           onPress: () => {
             try {
               deleteRecord(id);
-              // After deleting, reload data to reflect changes and pagination
               const total = countRecords();
               const newOffset =
                 offset >= total && offset > 0 ? offset - limit : offset;
@@ -113,7 +109,6 @@ export default function TableScreen() {
     }
   };
 
-  // Pagination navigation handlers
   const handlePrevious = () => {
     setOffset((prevOffset) => Math.max(0, prevOffset - limit));
   };
@@ -150,24 +145,14 @@ export default function TableScreen() {
         keyExtractor={(item) => item.id.toString()}
       />
 
-      {/* Pagination Bar */}
-      <View style={styles.paginationBar}>
-        <Button
-          title="Previous"
-          onPress={handlePrevious}
-          disabled={offset === 0}
-        />
-        <Text style={styles.paginationText}>
-          {`Showing ${totalRecords > 0 ? offset + 1 : 0}-${
-            offset + records.length
-          } of ${totalRecords}`}
-        </Text>
-        <Button
-          title="Next"
-          onPress={handleNext}
-          disabled={offset + limit >= totalRecords}
-        />
-      </View>
+      {/* Use the Pagination component */}
+      <Pagination
+        offset={offset}
+        limit={limit}
+        totalRecords={totalRecords}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       {selectedRecord && (
         <Modal

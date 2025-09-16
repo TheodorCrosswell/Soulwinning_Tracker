@@ -1,36 +1,83 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-
-const dummyData = [
-  { id: '1', name: 'John Doe', latitude: 34.052235, longitude: -118.243683 },
-  { id: '2', name: 'Jane Smith', latitude: 34.053235, longitude: -118.244683 },
-  { id: '3', name: 'Peter Jones', latitude: 34.054235, longitude: -118.245683 },
-];
+// MapScreen.tsx
+import { countRecords, selectLatestRecordsForMap } from "@/lib/database";
+import Pagination from "@/lib/pagination"; // Import the reusable component
+import { Record } from "@/navigation/types";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 export default function MapScreen() {
+  const [records, setRecords] = useState<Record[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = 50; // Or a different limit if you prefer
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadData = () => {
+        try {
+          const total = countRecords();
+          const dbRecords = selectLatestRecordsForMap(limit, offset);
+
+          if (isActive) {
+            setTotalRecords(total);
+            setRecords(dbRecords);
+          }
+        } catch (error) {
+          console.error("Failed to fetch records for map:", error);
+          Alert.alert("Error", "Failed to load records for the map.");
+        }
+      };
+
+      loadData();
+
+      return () => {
+        isActive = false;
+      };
+    }, [offset])
+  );
+
+  const handlePrevious = () => {
+    setOffset((prevOffset) => Math.max(0, prevOffset - limit));
+  };
+
+  const handleNext = () => {
+    if (offset + limit < totalRecords) {
+      setOffset((prevOffset) => prevOffset + limit);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.filterContainer}>
-        <Button title="Filter by Date" onPress={() => alert('Date filter not implemented yet')} />
-      </View>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 34.052235,
-          longitude: -118.243683,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      >
-        {dummyData.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-            title={marker.name}
-          />
-        ))}
+      <MapView style={styles.map}>
+        {records.map(
+          (record) =>
+            record.lat != null &&
+            record.lng != null && (
+              <Marker
+                key={record.id}
+                coordinate={{ latitude: record.lat, longitude: record.lng }}
+                title={
+                  (record.name || "Unnamed Record") +
+                  ` - ${record.count} - ${record.description}`
+                }
+                description={`Date: ${new Date(record.date).toLocaleString()}`}
+              />
+            )
+        )}
       </MapView>
+
+      {/* Use the Pagination component */}
+      <Pagination
+        offset={offset}
+        limit={limit}
+        totalRecords={totalRecords}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
     </View>
   );
 }
@@ -38,10 +85,6 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  filterContainer: {
-    padding: 10,
-    backgroundColor: '#fff',
   },
   map: {
     flex: 1,

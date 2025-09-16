@@ -1,4 +1,6 @@
 // input.tsx
+import { init, insertRecord, updateRecord } from "@/lib/database"; // Make sure the path is correct
+import { RootNavigationProp, RootStackParamList } from "@/navigation/types"; // Adjust path if needed
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -15,8 +17,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { init, insertRecord, updateRecord } from "../lib/database"; // Make sure the path is correct
-import { RootNavigationProp, RootStackParamList } from "../navigation/types"; // Adjust path if needed
 
 export default function InputScreen() {
   // Use RouteProp to type the route and its params
@@ -75,7 +75,7 @@ export default function InputScreen() {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 1,
     });

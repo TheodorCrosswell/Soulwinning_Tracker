@@ -116,6 +116,39 @@ export const selectLatestRecords = (limit: number, offset: number): any[] => {
 };
 
 /**
+ * Selects a specified number of records with an offset from the 'records' table.
+ * @param {number} limit - The number of records to retrieve.
+ * @param {number} offset - The number of records to skip.
+ * @returns {any[]} An array of the selected records.
+ */
+export const selectLatestRecordsForMap = (
+  limit: number,
+  offset: number
+): any[] => {
+  try {
+    const statement = `SELECT id,
+            name,
+            count,
+            description,
+            imageUri,
+            lat,
+            lng,
+            date
+        FROM records
+        WHERE lat IS NOT NULL 
+        AND lng IS NOT NULL
+        ORDER BY date DESC
+        LIMIT ? OFFSET ?;`;
+    const params = [limit, offset];
+    const result = db.getAllSync(statement, params);
+    return result;
+  } catch (error) {
+    console.error("Error selecting records:", error);
+    throw error;
+  }
+};
+
+/**
  * Counts the total number of records in the 'records' table.
  * @returns {number} The total number of records.
  */
