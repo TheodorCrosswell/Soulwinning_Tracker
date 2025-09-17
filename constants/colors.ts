@@ -11,6 +11,7 @@ export default {
     tabIconSelected: tintColorLight,
     success: "#34C759",
     destructive: "#dc3545",
+    warning: "#eed202",
   },
   dark: {
     text: "#fff",
@@ -20,5 +21,6 @@ export default {
     tabIconSelected: tintColorDark,
     success: "#34C759",
     destructive: "#dc3545",
+    warning: "#eed202",
   },
 };

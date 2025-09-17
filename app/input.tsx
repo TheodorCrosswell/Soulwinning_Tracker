@@ -39,6 +39,7 @@ export default function InputScreen() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [mode, setMode] = useState<"date" | "time">("date");
+  const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
   useEffect(() => {
     init()
@@ -73,6 +74,7 @@ export default function InputScreen() {
         });
       }
       setDate(new Date(record.date));
+      setBannerMessage("Editing existing record");
     }
   }, [record]);
 
@@ -135,6 +137,7 @@ export default function InputScreen() {
         Alert.alert("Success", "Record saved successfully!");
       }
       clearForm();
+      setBannerMessage(null);
     } catch (err) {
       console.log("Error saving record:", err);
       Alert.alert("Error", "Failed to save the record.");
@@ -174,6 +177,7 @@ export default function InputScreen() {
     setImage(null);
     setLocation(null);
     setDate(new Date());
+    setBannerMessage(null);
   };
 
   const clearName = () => setName("");
@@ -288,6 +292,19 @@ export default function InputScreen() {
     },
     dangerButton: {
       backgroundColor: colors.destructive,
+    },
+    banner: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: 10,
+      backgroundColor: colors.warning,
+      alignItems: "center",
+    },
+    bannerText: {
+      color: colors.background,
+      fontSize: 16,
     },
   });
 
@@ -459,6 +476,11 @@ export default function InputScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      {bannerMessage && (
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>{bannerMessage}</Text>
+        </View>
+      )}
     </View>
   );
 }
