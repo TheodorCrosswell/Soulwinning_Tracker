@@ -1,3 +1,4 @@
+// @/lib/database.ts
 import * as SQLite from "expo-sqlite";
 import { SQLiteDatabase, SQLiteRunResult } from "expo-sqlite";
 

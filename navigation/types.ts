@@ -1,3 +1,4 @@
+// @/lib/types.ts
 import { NavigationProp } from "@react-navigation/native";
 
 // Re-defining the Record interface here to be easily imported

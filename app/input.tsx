@@ -1,4 +1,5 @@
-// input.tsx
+// @/app/input.tsx
+import { useTheme } from "@/context/themecontext"; // Import the useTheme hook
 import { init, insertRecord, updateRecord } from "@/lib/database"; // Make sure the path is correct
 import { RootNavigationProp, RootStackParamList } from "@/navigation/types"; // Adjust path if needed
 import DateTimePicker, {
@@ -10,15 +11,17 @@ import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Button,
   Platform,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 
 export default function InputScreen() {
+  const { colors } = useTheme(); // Use the theme context
+
   // Use RouteProp to type the route and its params
   const route = useRoute<RouteProp<RootStackParamList, "input">>();
   const navigation = useNavigation<RootNavigationProp>();
@@ -193,23 +196,130 @@ export default function InputScreen() {
     setDate(newDate);
   };
 
+  // Dynamic styles that depend on the theme
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    label: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: "#ccc",
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      marginBottom: 12,
+      borderRadius: 5,
+      fontSize: 16,
+      color: colors.text,
+      backgroundColor: colors.background,
+    },
+    fieldContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    countContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 12,
+    },
+    countInput: {
+      flex: 2,
+      textAlign: "center",
+      marginHorizontal: 10,
+      marginBottom: 0,
+    },
+    countButton: {
+      flex: 1,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    infoText: {
+      fontSize: 16,
+      marginBottom: 12,
+      textAlign: "center",
+      color: colors.tabIconDefault,
+    },
+    dateText: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    buttonGroup: {
+      flexDirection: "row",
+    },
+    buttonWrapper: {
+      marginLeft: 10,
+    },
+    buttonWrapperFlex1: {
+      flex: 1,
+    },
+    buttonWrapperFlex3: {
+      flex: 3,
+      marginRight: 10,
+    },
+    // TouchableOpacity Styles
+    button: {
+      backgroundColor: colors.background,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: 5,
+      alignItems: "center",
+    },
+    buttonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    resetButton: {
+      // backgroundColor: "#6c757d",
+      backgroundColor: colors.tabIconDefault,
+    },
+    dangerButton: {
+      backgroundColor: colors.destructive,
+    },
+  });
+
   return (
     <View style={styles.container}>
       {/* Name */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>Name(s)</Text>
-        <Button title="Reset" onPress={clearName} color="#6c757d" />
+        <TouchableOpacity
+          style={[styles.button, styles.resetButton]}
+          onPress={clearName}
+        >
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
       </View>
       <TextInput style={styles.input} onChangeText={setName} value={name} />
 
       {/* Count */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>Count</Text>
-        <Button title="Reset" onPress={clearCount} color="#6c757d" />
+        <TouchableOpacity
+          style={[styles.button, styles.resetButton]}
+          onPress={clearCount}
+        >
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.countContainer}>
         <View style={styles.countButton}>
-          <Button title="-" onPress={decreaseCount} />
+          <TouchableOpacity style={styles.button} onPress={decreaseCount}>
+            <Text style={styles.buttonText}>-</Text>
+          </TouchableOpacity>
         </View>
         <TextInput
           style={[styles.input, styles.countInput]}
@@ -218,14 +328,21 @@ export default function InputScreen() {
           keyboardType="numeric"
         />
         <View style={styles.countButton}>
-          <Button title="+" onPress={increaseCount} />
+          <TouchableOpacity style={styles.button} onPress={increaseCount}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Description */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>Description</Text>
-        <Button title="Reset" onPress={clearDescription} color="#6c757d" />
+        <TouchableOpacity
+          style={[styles.button, styles.resetButton]}
+          onPress={clearDescription}
+        >
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
       </View>
       <TextInput
         style={styles.input}
@@ -237,10 +354,17 @@ export default function InputScreen() {
       {/* Image */}
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapperFlex3}>
-          <Button title="Attach Image" onPress={pickImage} />
+          <TouchableOpacity style={styles.button} onPress={pickImage}>
+            <Text style={styles.buttonText}>Attach Image</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.buttonWrapperFlex1}>
-          <Button title="Reset" onPress={clearImage} color="#6c757d" />
+          <TouchableOpacity
+            style={[styles.button, styles.resetButton]}
+            onPress={clearImage}
+          >
+            <Text style={styles.buttonText}>Reset</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <Text style={styles.infoText}>
@@ -250,10 +374,17 @@ export default function InputScreen() {
       {/* Location */}
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapperFlex3}>
-          <Button title="Record Location" onPress={recordLocation} />
+          <TouchableOpacity style={styles.button} onPress={recordLocation}>
+            <Text style={styles.buttonText}>Record Location</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.buttonWrapperFlex1}>
-          <Button title="Reset" onPress={clearLocation} color="#6c757d" />
+          <TouchableOpacity
+            style={[styles.button, styles.resetButton]}
+            onPress={clearLocation}
+          >
+            <Text style={styles.buttonText}>Reset</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <Text style={styles.infoText}>
@@ -269,10 +400,17 @@ export default function InputScreen() {
         <Text style={styles.dateText}>{date.toLocaleDateString()}</Text>
         <View style={styles.buttonGroup}>
           <View style={styles.buttonWrapper}>
-            <Button title="Select Date" onPress={showDatePicker} />
+            <TouchableOpacity style={styles.button} onPress={showDatePicker}>
+              <Text style={styles.buttonText}>Select Date</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.buttonWrapper}>
-            <Button title="Reset" onPress={resetDate} color="#6c757d" />
+            <TouchableOpacity
+              style={[styles.button, styles.resetButton]}
+              onPress={resetDate}
+            >
+              <Text style={styles.buttonText}>Reset</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -282,10 +420,17 @@ export default function InputScreen() {
         <Text style={styles.dateText}>{date.toLocaleTimeString()}</Text>
         <View style={styles.buttonGroup}>
           <View style={styles.buttonWrapper}>
-            <Button title="Select Time" onPress={showTimePicker} />
+            <TouchableOpacity style={styles.button} onPress={showTimePicker}>
+              <Text style={styles.buttonText}>Select Time</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.buttonWrapper}>
-            <Button title="Reset" onPress={resetTime} color="#6c757d" />
+            <TouchableOpacity
+              style={[styles.button, styles.resetButton]}
+              onPress={resetTime}
+            >
+              <Text style={styles.buttonText}>Reset</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -301,84 +446,19 @@ export default function InputScreen() {
       {/* Save & Clear */}
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapperFlex3}>
-          <Button title="Save Record" onPress={saveRecord} />
+          <TouchableOpacity style={styles.button} onPress={saveRecord}>
+            <Text style={styles.buttonText}>Save Record</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.buttonWrapperFlex1}>
-          <Button title="Reset All" onPress={clearForm} color="#dc3545" />
+          <TouchableOpacity
+            style={[styles.button, styles.dangerButton]}
+            onPress={clearForm}
+          >
+            <Text style={styles.buttonText}>Clear</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    paddingVertical: 4, // Reduced vertical padding
-    paddingHorizontal: 8,
-    marginBottom: 12,
-    borderRadius: 5,
-    fontSize: 16,
-  },
-  fieldContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  countContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  countInput: {
-    flex: 2, // Give the text input more space than the buttons
-    textAlign: "center",
-    marginHorizontal: 10,
-    marginBottom: 0,
-  },
-  countButton: {
-    flex: 1, // Allow buttons to take up more space
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 12,
-    textAlign: "center",
-    color: "#6c757d",
-  },
-  dateText: {
-    fontSize: 16,
-  },
-  // Wrapper for buttons in Date/Time rows
-  buttonGroup: {
-    flexDirection: "row",
-  },
-  // Spacing for individual buttons in a group
-  buttonWrapper: {
-    marginLeft: 10,
-  },
-  // Wrappers to maintain flex layout for main action buttons
-  buttonWrapperFlex1: {
-    flex: 1,
-  },
-  buttonWrapperFlex3: {
-    flex: 3,
-    marginRight: 10,
-  },
-});

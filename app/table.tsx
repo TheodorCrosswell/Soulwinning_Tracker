@@ -1,4 +1,5 @@
-// table.tsx
+// @/app/table.tsx
+import { useTheme } from "@/context/themecontext";
 import {
   countRecords,
   deleteRecord,
@@ -14,16 +15,128 @@ import {
 import { useCallback, useState } from "react";
 import {
   Alert,
-  Button,
   FlatList,
   Image,
   Modal,
   StyleSheet,
   Text,
+  TouchableOpacity, // Import TouchableOpacity
   View,
 } from "react-native";
 
 export default function TableScreen() {
+  const { colors } = useTheme(); // Use the theme context
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    list: {
+      flex: 1, // This makes the FlatList take up all available space
+    },
+    paginationContainer: {
+      position: "absolute", // Takes the element out of the normal layout flow
+      bottom: 0, // Pins it to the bottom
+      left: 0,
+      right: 0,
+    },
+    listContentContainer: {
+      paddingBottom: 80, // Add padding to the bottom of the list's content.
+      // Adjust this value to be a bit more than the height
+      // of your Pagination component to prevent overlap.
+    },
+    itemContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 15,
+      borderBottomWidth: 1,
+    },
+    itemDetails: {
+      flex: 1,
+    },
+    itemName: {
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    buttonContainer: {
+      flexDirection: "row",
+    },
+    button: {
+      padding: 10,
+      borderRadius: 5,
+      marginLeft: 10,
+    },
+    buttonText: {
+      color: colors.text,
+      textAlign: "center",
+    },
+    paginationBar: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderTopWidth: 1,
+    },
+    paginationText: {
+      fontSize: 14,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22,
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalView: {
+      margin: 20,
+      borderRadius: 20,
+      padding: 35,
+      alignItems: "stretch",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      width: "90%",
+    },
+    modalText: {
+      marginBottom: 15,
+      textAlign: "left",
+    },
+    bold: {
+      fontWeight: "bold",
+    },
+    modalButtonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      width: "100%",
+      marginTop: 20,
+    },
+    imageContainer: {
+      alignItems: "center",
+      marginVertical: 10,
+    },
+    modalImage: {
+      width: 250,
+      height: 250,
+      resizeMode: "contain",
+      marginBottom: 15,
+    },
+    noImageText: {
+      fontStyle: "italic",
+      color: colors.tabIconDefault,
+      textAlign: "center",
+      marginVertical: 20,
+    },
+  });
+
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [records, setRecords] = useState<Record[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -120,39 +233,53 @@ export default function TableScreen() {
   };
 
   const renderItem = ({ item }: { item: Record }) => (
-    <View style={styles.itemContainer}>
+    <View style={[styles.itemContainer, { borderBottomColor: colors.tint }]}>
       <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text>Count: {item.count}</Text>
-        <Text>Date: {new Date(item.date).toLocaleDateString()}</Text>
+        <Text style={[styles.itemName, { color: colors.text }]}>
+          {item.name}
+        </Text>
+        <Text style={{ color: colors.text }}>Count: {item.count}</Text>
+        <Text style={{ color: colors.text }}>
+          Date: {new Date(item.date).toLocaleDateString()}
+        </Text>
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="View" onPress={() => handleView(item)} />
-        <Button
-          title="Delete"
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.background }]}
+          onPress={() => handleView(item)}
+        >
+          <Text style={styles.buttonText}>View</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.destructive }]}
           onPress={() => handleDelete(item.id, item.name)}
-          color="red"
-        />
+        >
+          <Text style={styles.buttonText}>Delete</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={records}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
+        // Apply the padding to the content inside the FlatList
+        contentContainerStyle={styles.listContentContainer}
       />
 
-      {/* Use the Pagination component */}
-      <Pagination
-        offset={offset}
-        limit={limit}
-        totalRecords={totalRecords}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-      />
+      {/* Wrap the Pagination component and apply the absolute positioning style */}
+      <View style={styles.paginationContainer}>
+        <Pagination
+          offset={offset}
+          limit={limit}
+          totalRecords={totalRecords}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+        />
+      </View>
 
       {selectedRecord && (
         <Modal
@@ -165,28 +292,30 @@ export default function TableScreen() {
         >
           {/* Modal content remains the same... */}
           <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
+            <View
+              style={[styles.modalView, { backgroundColor: colors.background }]}
+            >
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Name:</Text>{" "}
                 {selectedRecord.name || "N/A"}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Count:</Text>{" "}
                 {selectedRecord.count || "N/A"}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Description:</Text>{" "}
                 {selectedRecord.description || "N/A"}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Latitude:</Text>{" "}
                 {selectedRecord.lat ?? "N/A"}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Longitude:</Text>{" "}
                 {selectedRecord.lng ?? "N/A"}
               </Text>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText, { color: colors.text }]}>
                 <Text style={styles.bold}>Date:</Text>{" "}
                 {new Date(selectedRecord.date).toLocaleString()}
               </Text>
@@ -204,11 +333,24 @@ export default function TableScreen() {
               </View>
 
               <View style={styles.modalButtonContainer}>
-                <Button title="Edit" onPress={handleEdit} />
-                <Button
-                  title="Close"
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    { backgroundColor: colors.background },
+                  ]}
+                  onPress={handleEdit}
+                >
+                  <Text style={styles.buttonText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    { backgroundColor: colors.background },
+                  ]}
                   onPress={() => setModalVisible(!modalVisible)}
-                />
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -217,93 +359,3 @@ export default function TableScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  itemContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-  },
-  paginationBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-    backgroundColor: "#f8f8f8",
-  },
-  paginationText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-    backgroundColor: "rgba(0,0,0,0.5)", // Added for better modal focus
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "stretch",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "90%", // Set a max-width for the modal
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "left",
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 20,
-  },
-  imageContainer: {
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  modalImage: {
-    width: 250,
-    height: 250,
-    resizeMode: "contain",
-    marginBottom: 15,
-  },
-  noImageText: {
-    fontStyle: "italic",
-    color: "#888",
-    textAlign: "center",
-    marginVertical: 20,
-  },
-});

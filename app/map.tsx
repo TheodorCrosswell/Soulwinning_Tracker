@@ -1,4 +1,5 @@
-// MapScreen.tsx
+// map.tsx
+import { useTheme } from "@/context/themecontext"; // Import the useTheme hook
 import { countRecords, selectLatestRecordsForMap } from "@/lib/database";
 import Pagination from "@/lib/pagination"; // Import the reusable component
 import { Record } from "@/navigation/types";
@@ -8,6 +9,7 @@ import { Alert, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 export default function MapScreen() {
+  const { colors } = useTheme(); // Use the theme hook to get the current colors
   const [records, setRecords] = useState<Record[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -50,6 +52,17 @@ export default function MapScreen() {
     }
   };
 
+  // Define styles dynamically based on the theme colors
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background, // Apply background color from theme
+    },
+    map: {
+      flex: 1,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <MapView style={styles.map}>
@@ -81,12 +94,3 @@ export default function MapScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-});
