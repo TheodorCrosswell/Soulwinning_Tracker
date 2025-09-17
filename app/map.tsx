@@ -1,7 +1,7 @@
 // map.tsx
-import { useTheme } from "@/context/themecontext"; // Import the useTheme hook
+import { useTheme } from "@/context/themecontext";
 import { countRecords, selectLatestRecordsForMap } from "@/lib/database";
-import Pagination from "@/lib/pagination"; // Import the reusable component
+import Pagination from "@/lib/pagination";
 import { Record } from "@/navigation/types";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -9,11 +9,11 @@ import { Alert, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 export default function MapScreen() {
-  const { colors } = useTheme(); // Use the theme hook to get the current colors
+  const { colors } = useTheme();
   const [records, setRecords] = useState<Record[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [offset, setOffset] = useState(0);
-  const limit = 50; // Or a different limit if you prefer
+  const limit = 50;
 
   useFocusEffect(
     useCallback(() => {
@@ -52,11 +52,10 @@ export default function MapScreen() {
     }
   };
 
-  // Define styles dynamically based on the theme colors
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background, // Apply background color from theme
+      backgroundColor: colors.background,
     },
     map: {
       flex: 1,
@@ -83,7 +82,7 @@ export default function MapScreen() {
         )}
       </MapView>
 
-      {/* Use the Pagination component */}
+      {/*Pagination component */}
       <Pagination
         offset={offset}
         limit={limit}

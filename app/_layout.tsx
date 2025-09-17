@@ -1,5 +1,5 @@
 // @/app/_layout.tsx
-import { ThemeProvider, useTheme } from "@/context/themecontext"; // Assuming you've set up path aliases for @/
+import { ThemeProvider, useTheme } from "@/context/themecontext";
 import { FontAwesome } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
@@ -12,10 +12,9 @@ export default function RootLayout() {
   );
 }
 
-// The AppLayout component now consumes the theme context
+// The AppLayout component consumes the theme context
 function AppLayout() {
   const { colors } = useTheme(); // Use the hook to get the current theme's colors
-
   return (
     <Tabs
       screenOptions={{

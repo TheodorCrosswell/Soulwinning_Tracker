@@ -4,16 +4,13 @@ import { deleteAllRecords, insertDummyData } from "@/lib/database";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function SettingsScreen() {
-  const { colors } = useTheme(); // Use the theme context
-
-  // Define styles inside the component to access theme colors
+  const { colors } = useTheme();
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
       backgroundColor: colors.background,
     },
-    // Base style for all buttons
     button: {
       paddingVertical: 12,
       paddingHorizontal: 20,
@@ -22,21 +19,19 @@ export default function SettingsScreen() {
       justifyContent: "center",
       marginTop: 15,
     },
-    // Style for the primary button's text, which needs to adapt
     primaryButtonText: {
-      color: colors.text, // Use the theme's background color for the text
+      color: colors.text,
       fontSize: 16,
       fontWeight: "bold",
     },
-    // Specific styles for each button type
     primaryButton: {
-      backgroundColor: colors.tabIconDefault, // Use tint color for the primary action
+      backgroundColor: colors.tabIconDefault,
     },
     successButton: {
-      backgroundColor: colors.success, // Green for success/add actions
+      backgroundColor: colors.success,
     },
     destructiveButton: {
-      backgroundColor: colors.destructive, // Red for destructive actions
+      backgroundColor: colors.destructive,
     },
   });
 
@@ -86,7 +81,6 @@ export default function SettingsScreen() {
         onPress={handleExportData}
         activeOpacity={0.7}
       >
-        {/* Use the new theme-aware text style here */}
         <Text style={styles.primaryButtonText}>Export Data</Text>
       </TouchableOpacity>
 

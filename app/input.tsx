@@ -1,11 +1,11 @@
 // @/app/input.tsx
-import { useTheme } from "@/context/themecontext"; // Import the useTheme hook
-import { init, insertRecord, updateRecord } from "@/lib/database"; // Make sure the path is correct
-import { RootNavigationProp, RootStackParamList } from "@/navigation/types"; // Adjust path if needed
+import { useTheme } from "@/context/themecontext";
+import { init, insertRecord, updateRecord } from "@/lib/database";
+import { RootStackParamList } from "@/navigation/types";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -24,13 +24,11 @@ export default function InputScreen() {
 
   // Use RouteProp to type the route and its params
   const route = useRoute<RouteProp<RootStackParamList, "input">>();
-  const navigation = useNavigation<RootNavigationProp>();
-  // The 'record' property is now correctly typed
   const record = route.params?.record;
 
   const [id, setId] = useState<number | null>(null);
   const [name, setName] = useState("");
-  const [count, setCount] = useState(0); // Default value is 0
+  const [count, setCount] = useState(0);
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(
@@ -101,7 +99,6 @@ export default function InputScreen() {
     setLocation(location);
   };
 
-  // Functions to handle count increase and decrease
   const increaseCount = () => {
     setCount((prevCount) => prevCount + 1);
   };
@@ -200,7 +197,6 @@ export default function InputScreen() {
     setDate(newDate);
   };
 
-  // Dynamic styles that depend on the theme
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -273,7 +269,6 @@ export default function InputScreen() {
       flex: 3,
       marginRight: 10,
     },
-    // TouchableOpacity Styles
     button: {
       backgroundColor: colors.background,
       paddingVertical: 5,
@@ -287,7 +282,6 @@ export default function InputScreen() {
       fontWeight: "bold",
     },
     resetButton: {
-      // backgroundColor: "#6c757d",
       backgroundColor: colors.tabIconDefault,
     },
     dangerButton: {

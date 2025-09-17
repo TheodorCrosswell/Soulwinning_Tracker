@@ -5,7 +5,7 @@ import {
   deleteRecord,
   selectLatestRecords,
 } from "@/lib/database";
-import Pagination from "@/lib/pagination"; // Import the reusable component
+import Pagination from "@/lib/pagination";
 import { Record, RootStackParamList } from "@/navigation/types";
 import {
   NavigationProp,
@@ -20,12 +20,12 @@ import {
   Modal,
   StyleSheet,
   Text,
-  TouchableOpacity, // Import TouchableOpacity
+  TouchableOpacity,
   View,
 } from "react-native";
 
 export default function TableScreen() {
-  const { colors } = useTheme(); // Use the theme context
+  const { colors } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
@@ -36,16 +36,15 @@ export default function TableScreen() {
     list: {
       flex: 1, // This makes the FlatList take up all available space
     },
+    // For making the pagination not have any weird layout issues
     paginationContainer: {
-      position: "absolute", // Takes the element out of the normal layout flow
-      bottom: 0, // Pins it to the bottom
+      position: "absolute",
+      bottom: 0,
       left: 0,
       right: 0,
     },
     listContentContainer: {
-      paddingBottom: 80, // Add padding to the bottom of the list's content.
-      // Adjust this value to be a bit more than the height
-      // of your Pagination component to prevent overlap.
+      paddingBottom: 80, // Add padding to the bottom of the list's content, to avoid overlap with the pagination component
     },
     itemContainer: {
       flexDirection: "row",
@@ -143,7 +142,6 @@ export default function TableScreen() {
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  // State for pagination
   const [totalRecords, setTotalRecords] = useState(0);
   const [offset, setOffset] = useState(0);
   const limit = 50;
@@ -266,7 +264,6 @@ export default function TableScreen() {
         data={records}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        // Apply the padding to the content inside the FlatList
         contentContainerStyle={styles.listContentContainer}
       />
 
@@ -290,7 +287,7 @@ export default function TableScreen() {
             setModalVisible(!modalVisible);
           }}
         >
-          {/* Modal content remains the same... */}
+          {/* Modal content*/}
           <View style={styles.centeredView}>
             <View
               style={[styles.modalView, { backgroundColor: colors.background }]}
